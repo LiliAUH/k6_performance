@@ -20,7 +20,7 @@ jobs:
       - name: Run k6 load test
         uses: grafana/k6-action@v0.2.0
         with:
-          filename: scripts/test.js
+          filename: k6/scripts/test.js
 
       - run: ls && mkdir report && mv index.html report
 
