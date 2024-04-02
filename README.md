@@ -83,3 +83,59 @@ O sistema se recupera sem intervenção manual após o término do teste de estr
 
 O teste pode validar a arquitetura de uma aplicação que foi construída, identificando gargalos que podem ser prejudiciais a uma aplicação.
 
+```
+export const options = {
+    stages: [
+        {duration: '2m', target: 100},
+        {duration: '5m', target: 100},
+        {duration: '2m', target: 200},
+        {duration: '5m', target: 200},
+        {duration: '2m', target: 300},
+        {duration: '5m', target: 300},
+        {duration: '2m', target: 400},
+        {duration: '5m', target: 400},
+        {duration: '10m', target: 0},
+    ],
+};
+```
+
+O aumento de carga repentino consegue validar se a sua infraestrutura consegue se recuperar sozinha 
+A rapidez com que os mecanismos de dimensionamento automático reagem ao aumento de carga.
+Se houver alguma falha durante os eventos de dimensionamento.
+
+Spike Testing: atingimos uma carga extrema em um período de tempo muito curto.
+
+Ele mostra como seu sistema funcionará sob um aumento repentino de tráfego e como seu sistema irá se recuperar assim que o tráfego diminuir
+
+4 tipos de resposta
+
+Excelente: onde o sistema não é degradado durante o aumento do tráfego, o tempo de resposta é semelhante durante o tráfego baixo e alto.
+
+Bom: o tempo de resposta é mais lento, mas o sistema não apresenta erros e todos os pedidos são tratados.
+
+Insatisfatório: o sistema produz erros durante o aumento de tráfego, mas volta ao normal depois que o tráfego diminui
+
+Ruim: o sistema trava e não se recupera depois que o tráfego diminui
+
+```
+export const options = {
+    stages: [
+        {duration: '10s', target: 100},
+        {duration: '1m', target: 100},
+        {duration: '10s', target: 1400},
+        {duration: '3m', target: 1400},
+        {duration: '10s', target: 100},
+        {duration: '3m', target: 100},
+        {duration: '10s', target: 0},
+    ],
+};
+```
+
+
+
+
+
+
+
+
+
