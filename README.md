@@ -73,7 +73,7 @@ export const options = {
 - permite que o sistema aqueça ou redimensione automaticamente para lidar com o tráfego
 - permite que você compare o tempo de resposta entre os estágios de carga baixa e carga normal 
 
-Stressing Test: busca como o sistema se comporta sobre alta carga, avalia disponibilidade, estabilidade e recuperabilidade do sistema
+**Stressing Test:** busca como o sistema se comporta sobre alta carga, avalia disponibilidade, estabilidade e recuperabilidade do sistema
 
 Precisa ser feito alguma perguntas
 Como seu sistema se comporta em condições extremas?
@@ -103,7 +103,7 @@ O aumento de carga repentino consegue validar se a sua infraestrutura consegue s
 A rapidez com que os mecanismos de dimensionamento automático reagem ao aumento de carga.
 Se houver alguma falha durante os eventos de dimensionamento.
 
-Spike Testing: atingimos uma carga extrema em um período de tempo muito curto.
+**Spike Testing:** atingimos uma carga extrema em um período de tempo muito curto.
 
 Ele mostra como seu sistema funcionará sob um aumento repentino de tráfego e como seu sistema irá se recuperar assim que o tráfego diminuir
 
@@ -130,6 +130,102 @@ export const options = {
     ],
 };
 ```
+**Soak Testing ou teste de imersão:** se preocupa com a confiabilidade durante um longo período de tempo, simulando dias de tráfego em um sistema em poucas horas.
+
+O sistema não sofre de bugs ou vazamento de memória.
+Verifique se as reinicializações inesperadas do aplicativo não perdem solicitações
+Encontre bugs relacionados a condições de corrida que aparecem esporadicamente
+
+Certificar que o seu banco de dados não esgote o espaço de armazenamento alocado e pare.
+Certifique-se de que seus logs não esgotam o armazenamento em disco alocado
+Certifique-se de que os serviços externos dos quais você depende não parem de funcionar após a execução de uma certa quantidade de solicitações.
+
+```
+export const options = {
+    stages: [
+        {duration: '2m', target: 400},
+        {duration: '3h56m', target: 400},
+        {duration: '2m', target: 0},
+    ],
+};
+```
+
+Dois pontos importante antes de executar o teste 
+Quantidade de usuários usar 80% da capacidade do sistema para não ocasionar o ponto de ruptura e requisitos de infraestrutura se o seu sistema utiliza alguma aplicação externa e essa aplicação ocasiona em custos para o seu time, precisa ter em mente os custos e falar com a liderança.
+
+**Breakpoint Testing ou teste de ponto de interrupção:** onde desejamos encontrar o limite do seu sistema, conhecido como teste de capacidade. 
+
+Ajustar/ Cuidar de pontos fracos do sistema, buscando limites maiores suportados pelo sistema
+Ajudar a planejar e verificar a correção de sistema com baixo limite de utilização
+
+Quando executar o teste:
+Após mudanças significativas na base de código/ infraestrutura
+Consumo elevado de recursos pelo seu sistema
+Carga do sistema cresce continuamente? 
+
+Considerações antes de iniciar o teste
+Atenção a elasticidade de ambientes de nuvem ( limite do sistema)
+Aumento de carga gradual para essa modalidade
+Tipo de teste de ciclo iterativo ( vai realizar vários experimentos para atingir o limite do sistema)
+Interrupção manual (no CLI) ou automática (Abortion failes)
+
+Você precisa que o sistema seja aprovado em todos os outros testes antes, pois ele precisa estar maduro para realizar o brakpoint test.
+
+```
+import http from 'k6/http';
+import {sleep} from 'k6';
+
+
+export const options = {
+    executor: ‘ramping-arrival-rate’, 
+    stages: [
+        {duration: '2h', target: 20000},
+    ],
+};
+
+
+export default () => {
+	const urlRes = http.get(‘https://test-api.k6.io’);
+	sleep(1);
+};
+```
+
+**Ciclo de vida de um teste com K6**
+
+**Inicialização:** vamos carregar arquivo locais, importar módulos, essa chamada ocorre uma única vez. 
+
+
+```
+import {sleep} from 'k6';
+```
+
+
+**Configuração:** onde configuramos dados que são compartilhados entre todos os usuários virtuais, dentre todas as views. É uma etapa que também é chamada uma única vez durante todo o ciclo de execução. 
+
+```	
+export const option = {
+    vus: 1,                 
+    duration: '10s'
+}
+```
+
+**Execução ou código VU:** é onde executamos a nossa função de teste, o código vu são executados rapidamente durante a execução do teste. Pode solicitar http, emitir métricas e fazer tudo que espera que um testes de carga faça
+
+```
+export default () => {
+	console.log(“testando o k6”);
+	sleep(‘);
+};
+```
+
+**Desmontagem:** etapa opcional do teste onde podemos processar os resultados da etapa de configuração e execução. Bastante útil quando queremos enviar resultados por um webhook para alguma plataforma externa ou tratamento de dados. É executada uma única vez durante o ciclo de vida do teste.
+
+```
+export function teardown(data){ 
+   console.log(data)
+}
+```
+
 
 
 
